@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+
+const userRoutes = require("./routes/userRoutes");
 const connectToDB = require("./config/db");
 
 const app = express();
@@ -15,6 +17,8 @@ connectToDB();
 app.get("/", (req, res) => {
   res.send("server is running...");
 });
+
+app.use("/api", userRoutes);
 
 app.listen(port, () => {
   console.log(`app listening on port: ${port}`);
