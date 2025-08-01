@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
+const companyRoutes = require("./routes/companyRoutes");
 const connectToDB = require("./config/db");
 
 const app = express();
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", userRoutes);
+app.use("/api", companyRoutes);
 
 app.listen(port, () => {
   console.log(`app listening on port: ${port}`);

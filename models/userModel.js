@@ -14,8 +14,8 @@ const userSchema = new mongoose.Schema({
     default: "jobseeker",
   },
   company: {
-    type: String,
-    default: "none",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
   },
 });
 

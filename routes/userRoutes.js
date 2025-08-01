@@ -18,7 +18,7 @@ router.post("/create-user", verifyToken, verifyRole("admin"), createUser);
 
 router.get("/all-users", verifyToken, verifyRole("admin"), getAllUsers);
 
-router.patch(
+router.put(
   "/update-user/:userId",
   verifyToken,
   verifyRole("admin"),

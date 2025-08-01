@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const Company = require("../models/companyModel");
 
 const register = async (req, res) => {
   const { name, email, password, role, company } = req.body;
@@ -62,7 +63,7 @@ const login = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, company } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -71,7 +72,13 @@ const createUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      company,
+    });
     await newUser.save();
 
     res
@@ -97,17 +104,31 @@ const getAllUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { name, email, role } = req.body;
+  const { name, email, role, companyName } = req.body;
 
   try {
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { name, email, role },
-      { new: true }
-    );
+    let companyId = null;
+    if (companyName) {
+      const company = await Company.findOne({ name: companyName });
+      if (!company) {
+        return res.status(400).json({ message: "Company not found" });
+      }
+      companyId = company._id;
+    }
+
+    const updateData = { name, email, role };
+    if (companyId) {
+      updateData.company = companyId;
+    }
+
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     res.status(200).json({ message: "User updated successfully", user });
   } catch (err) {
     res
