@@ -74,6 +74,62 @@ const manageApplication = async (req, res) => {
   }
 };
 
+// const applyForJob = async (req, res) => {
+//   const { jobId } = req.params;
+
+//   try {
+//     const job = await Job.findById(jobId);
+//     if (!job) return res.status(404).json({ message: "Job not found" });
+
+//     const existingApplication = await Application.findOne({
+//       job: jobId,
+//       applicant: req.user.userId,
+//     });
+//     if (existingApplication) {
+//       return res
+//         .status(400)
+//         .json({ message: "You have already applied for this job" });
+//     }
+
+//     if (!req.file) {
+//       return res
+//         .status(400)
+//         .json({ message: "CV is required to apply for a job" });
+//     }
+
+//     const paymentResult = await processPayment(100, req.user.userId);
+//     if (paymentResult.status !== "success") {
+//       return res.status(400).json({ message: "Payment failed" });
+//     }
+
+//     const newApplication = new Application({
+//       job: jobId,
+//       applicant: req.user.userId,
+//       status: "pending",
+//       paymentStatus: "paid",
+//     });
+
+//     await newApplication.save();
+
+//     const invoice = new Invoice({
+//       user: req.user.userId,
+//       amount: 100,
+//     });
+
+//     await invoice.save();
+
+//     res.status(201).json({
+//       message: "Application submitted successfully",
+//       application: newApplication,
+//       invoice,
+//     });
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .json({ message: "Error applying for job", error: err.message });
+//   }
+// };
+
 const applyForJob = async (req, res) => {
   const { jobId } = req.params;
 
@@ -97,6 +153,8 @@ const applyForJob = async (req, res) => {
         .json({ message: "CV is required to apply for a job" });
     }
 
+    const cvPath = req.file.path;
+
     const paymentResult = await processPayment(100, req.user.userId);
     if (paymentResult.status !== "success") {
       return res.status(400).json({ message: "Payment failed" });
@@ -107,6 +165,7 @@ const applyForJob = async (req, res) => {
       applicant: req.user.userId,
       status: "pending",
       paymentStatus: "paid",
+      cvPath: cvPath,
     });
 
     await newApplication.save();

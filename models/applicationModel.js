@@ -17,6 +17,7 @@ const applicationSchema = new mongoose.Schema({
     enum: ["paid", "pending"],
     default: "pending",
   },
+  cvPath: { type: String, required: true },
   appliedAt: { type: Date, default: Date.now },
 });
 

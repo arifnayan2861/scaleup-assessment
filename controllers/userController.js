@@ -108,12 +108,32 @@ const updateUser = async (req, res) => {
 
   try {
     let companyId = null;
+
     if (companyName) {
       const company = await Company.findOne({ name: companyName });
       if (!company) {
         return res.status(400).json({ message: "Company not found" });
       }
       companyId = company._id;
+
+      await Company.findByIdAndUpdate(
+        companyId,
+        { $addToSet: { users: userId } },
+        { new: true }
+      );
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.company && user.company.toString() !== companyId) {
+      await Company.findByIdAndUpdate(
+        user.company,
+        { $pull: { users: userId } },
+        { new: true }
+      );
     }
 
     const updateData = { name, email, role };
@@ -121,15 +141,13 @@ const updateUser = async (req, res) => {
       updateData.company = companyId;
     }
 
-    const user = await User.findByIdAndUpdate(userId, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ message: "User updated successfully", user });
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
   } catch (err) {
     res
       .status(500)
